@@ -55,6 +55,7 @@ long pqAccess(PageQueue *pq, unsigned long pageNum) {
     if(currentNode == NULL){
 
         PqNode* newNode = (PqNode*)malloc(sizeof(PqNode));
+
         newNode->pageNum = pageNum;
         newNode->next = NULL;
         newNode->prev = pq->tail;
@@ -93,7 +94,14 @@ long pqAccess(PageQueue *pq, unsigned long pageNum) {
 
     currentNode->next = NULL;
     currentNode->prev = pq->tail;
-    pq->tail->next = currentNode;
+
+    if(pq->tail != NULL){
+        pq->tail->next = currentNode;
+    }
+    else{
+        pq->head = currentNode;
+    }
+    
     pq->tail = currentNode;
 
     return d;
