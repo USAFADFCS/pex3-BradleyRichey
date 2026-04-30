@@ -1,12 +1,12 @@
 /** main.c
  * ===========================================================
- * Name: _______________________, __ ___ 2026
- * Section: CS483 / ____
+ * Name: Bradley richey
+ * Section: CS483 / M3
  * Project: PEX3 - Page Replacement Simulator
  * Purpose: Reads a BYU binary memory trace file and simulates
  *          LRU page replacement to measure fault rates across
  *          varying frame allocations.
- * Documentation: TBD
+ * Documentation: NONE other than CS220 DLL lab and pex slides
  * =========================================================== */
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,10 +67,13 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Frame size option %d: %d offset bits, %d max frames, algorithm=LRU\n",
             menuOption, offsetBits, maxFrames);
 
-    // TODO: Create your PageQueue (call pqInit, which returns a pointer)
-    //       and allocate the faults[] array.  faults[f] will hold the
-    //       total number of page faults that occur when f frames are
-    //       available.  Use calloc so all entries start at zero.
+    
+    PageQueue* pq = pqInit(maxFrames);
+    
+
+    long unsigned int *faults = calloc(maxFrames, sizeof(long unsigned int));
+
+    
 
     // Process each memory access from the trace file
     while (!feof(ifp)) {
@@ -86,13 +89,18 @@ int main(int argc, char **argv) {
             fprintf(stderr, "%lu samples read, last page: %lu\r", numAccesses, pageNum);
         }
 
-        // TODO: Call pqAccess() to simulate this memory reference.
-        //       It returns:
-        //         -1      -> page was NOT in the queue (fault for ALL frame counts)
-        //         d >= 0  -> page was at depth d from the MRU end
-        //                    (fault for any allocation with fewer than d+1 frames)
-        //
-        //       Update faults[] accordingly.
+
+        long depth = pqAccess(pq, pageNum);
+
+        if (depth == -1) {
+            // Miss: fault for every frame count
+            for (int f = 1; f <= maxFrames; f++)
+                faults[f]++;
+        } else {
+            // Hit at depth d: fault for f <= d
+            for (int f = 1; f <= depth; f++)
+                faults[f]++;
+        }
 
     }
 
@@ -102,12 +110,16 @@ int main(int argc, char **argv) {
     printf("Total Accesses:,%lu\n", numAccesses);
     printf("Frames,Missees,Miss Rate\n");
 
-    // TODO: Loop from frame count 1 to maxFrames and print each row:
-    //       printf("%d,%lu,%f\n", frameCount, faults[frameCount],
-    //              (double)faults[frameCount] / (double)numAccesses);
 
-    // TODO: Free your PageQueue and the faults[] array,
-    //       then close the file.
+    for(int frameCount = 1; frameCount <= maxFrames; frameCount++){
+        printf("%d,%lu,%f\n", frameCount, faults[frameCount],
+                  (double)faults[frameCount] / (double)numAccesses);
+    }
+
+    
+
+    pqFree(pq);
+    fclose(ifp);
 
     return 0;
 }
