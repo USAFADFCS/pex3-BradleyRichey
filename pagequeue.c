@@ -62,14 +62,32 @@ long pqAccess(PageQueue *pq, unsigned long pageNum) {
 
         if(pq->tail == NULL){
             pq->head = newNode;
-            pq->tail = newNode;
+            pq->tail = newNode; 
         }
         else{
             pq->tail->next = newNode;
-            pq->tail = newNode;
+            pq->tail = newNode;  
         }
 
         pq->size++;
+
+        while(pq->size > pq->maxSize){
+            PqNode *temp = pq->head;
+            pq->head = pq->head->next;
+
+            if(pq->head != NULL){
+                pq->head->prev = NULL;
+            }
+            else{
+                pq->tail = NULL;
+            }
+
+            free(temp);
+            pq->size--;
+        }
+
+
+
         return -1;
         
     }
@@ -114,10 +132,8 @@ long pqAccess(PageQueue *pq, unsigned long pageNum) {
 void pqFree(PageQueue *pq) {
     
     while(pq->head != NULL){
-        PqNode* delNode = (PqNode*)malloc(sizeof(PqNode));
+        PqNode* delNode = pq->head;
 
-        delNode = pq->head;
-        
         pq->head = delNode->next;
         free(delNode);
     }

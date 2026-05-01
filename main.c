@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
     PageQueue* pq = pqInit(maxFrames);
     
 
-    long unsigned int *faults = calloc(maxFrames + 1, sizeof(long unsigned int));
+    long unsigned int *faults = calloc(maxFrames, sizeof(long unsigned int));
 
     
 
